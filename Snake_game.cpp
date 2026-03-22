@@ -10,8 +10,12 @@ const int cellCount = 30;
 class Food {
 private:
     Vector2 pos;
+    Texture2D food_texture;
 public:
     Food() {
+        Image image = LoadImage("graphics/food.png");
+        this->food_texture = LoadTextureFromImage(image);
+        UnloadImage(image);
         int x = GetRandomValue(0, cellCount - 1);
         int y = GetRandomValue(0, cellCount - 1);
         this->pos.x = x;
@@ -21,7 +25,11 @@ public:
     void draw() const {
         int x = pos.x * cellSize;
         int y = pos.y * cellSize;
-        DrawRectangle(x, y, cellSize, cellSize, ORANGE);
+        DrawTexture(this->food_texture, x, y, WHITE);
+    }
+
+    ~Food() {
+        UnloadTexture(this->food_texture);
     }
 };
 
