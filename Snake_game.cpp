@@ -33,14 +33,29 @@ public:
             float pos_x = this->body[i].x * cellSize;
             float pos_y = this->body[i].y * cellSize;
             Rectangle segment = Rectangle{ pos_x,pos_y,cellSize,cellSize };
-            DrawRectangleRounded(segment, 0.6, 8, MAROON);
+            DrawRectangleRounded(segment, 0.7, 8, MAROON);
         }
     }
 
     void Update() {
-        if (this->triggerEvent(0.15)) {
+        if (this->triggerEvent(0.1)) {
             this->body.pop_back();
             this->body.push_front({ this->body[0].x + this->Direction.x, this->body[0].y + this->Direction.y });
+        }
+    }
+
+    void updateDirection() {
+        if (IsKeyPressed(KEY_W) && this->Direction.y != 1) {
+            this->Direction = { 0,-1 };
+        }
+        if (IsKeyPressed(KEY_S) && this->Direction.y != -1) {
+            this->Direction = { 0,1 };
+        }
+        if (IsKeyPressed(KEY_A) && this->Direction.x != 1) {
+            this->Direction = { -1,0 };
+        }
+        if (IsKeyPressed(KEY_D) && this->Direction.x != -1) {
+            this->Direction = { 1,0 };
         }
     }
 };
@@ -74,6 +89,35 @@ public:
     }
 };
 
+class Game {
+private:
+    Snake* snake;
+    Food* food;
+public:
+    Game() {
+        snake = new Snake();
+        food = new Food();
+    }
+
+    void draw() {
+        food->draw();
+        snake->draw();
+    }
+
+    void updateSnake() {
+        snake->Update();
+        snake->updateDirection();
+    }
+
+
+    ~Game() {
+        delete snake;
+        delete food;
+        snake = nullptr;
+        food = nullptr;
+    }
+};
+
 int main()
 {
     const int width = cellSize * cellCount;
@@ -82,17 +126,15 @@ int main()
     InitWindow(width, height, "Snake Game");
     SetTargetFPS(60);
 
-    Food food;
-    Snake snake;
+    Game game;
 
     while (!WindowShouldClose()) {
 
-        snake.Update();
+        game.updateSnake();
 
         BeginDrawing();
-        ClearBackground(DARKGREEN);
-        food.draw();
-        snake.draw();
+        ClearBackground(DARKBLUE);
+        game.draw();
         EndDrawing();
     }
 
