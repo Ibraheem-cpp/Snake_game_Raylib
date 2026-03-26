@@ -8,6 +8,55 @@ using namespace std;
 const int cellSize = 30;
 const int cellCount = 25;
 
+class Food {
+private:
+    Vector2 pos;
+    Texture2D food_texture;
+public:
+    Food() {
+        Image image = LoadImage("graphics/food.png");
+        this->food_texture = LoadTextureFromImage(image);
+        UnloadImage(image);
+        this->pos = getRandomPosition();
+    }
+
+    void draw() const {
+        int x = pos.x * cellSize;
+        int y = pos.y * cellSize;
+        DrawTexture(this->food_texture, x, y, WHITE);
+    }
+
+    Vector2 getRandomPosition() {
+        float x = GetRandomValue(0, cellCount - 1);
+        float y = GetRandomValue(0, cellCount - 1);
+        return Vector2{ x,y };
+    }
+
+    void changeLoc(const deque<Vector2>& snakeBody) {
+        bool isUnique = false;
+        Vector2 loc = { 0,0 };
+        while (!isUnique) {
+            isUnique = true;
+            loc = getRandomPosition();
+            for (int i = 0; i < snakeBody.size(); i++) {
+                if (loc.x == snakeBody[i].x && loc.y == snakeBody[i].y) {
+                    isUnique = false;
+                    break;
+                }
+            }
+        }
+        this->pos = loc;
+    }
+
+    Vector2 getFoodLoc() const {
+        return this->pos;
+    }
+
+    ~Food() {
+        UnloadTexture(this->food_texture);
+    }
+};
+
 class Snake {
 private:
     deque<Vector2> body;
@@ -58,34 +107,17 @@ public:
             this->Direction = { 1,0 };
         }
     }
-};
 
-class Food {
-private:
-    Vector2 pos;
-    Texture2D food_texture;
-public:
-    Food() {
-        Image image = LoadImage("graphics/food.png");
-        this->food_texture = LoadTextureFromImage(image);
-        UnloadImage(image);
-        this->pos = getRandomPosition();
+    bool didEatFood(Food* food) const {
+        Vector2 foodLoc = food->getFoodLoc();
+        if ((this->body[0].x == foodLoc.x) && (this->body[0].y == foodLoc.y)) {
+            return true;
+        }
+        return false;
     }
 
-    void draw() const {
-        int x = pos.x * cellSize;
-        int y = pos.y * cellSize;
-        DrawTexture(this->food_texture, x, y, WHITE);
-    }
-
-    Vector2 getRandomPosition() {
-        float x = GetRandomValue(0, cellCount - 1);
-        float y = GetRandomValue(0, cellCount - 1);
-        return Vector2{ x,y };
-    }
-
-    ~Food() {
-        UnloadTexture(this->food_texture);
+    const deque<Vector2>& snakeBody() const {
+        return this->body;
     }
 };
 
@@ -109,6 +141,11 @@ public:
         snake->updateDirection();
     }
 
+    void checkCollosionWithFood() {
+        if (snake->didEatFood(food)) {
+            food->changeLoc(snake->snakeBody());
+        }
+    }
 
     ~Game() {
         delete snake;
@@ -130,10 +167,12 @@ int main()
 
     while (!WindowShouldClose()) {
 
+        game.checkCollosionWithFood();
+    
         game.updateSnake();
-
+  
         BeginDrawing();
-        ClearBackground(DARKBLUE);
+        ClearBackground(DARKGREEN);
         game.draw();
         EndDrawing();
     }
