@@ -86,10 +86,13 @@ public:
         }
     }
 
-    void Update() {
+    void Update(bool& snakeGrew) {
         if (this->triggerEvent(0.1)) {
-            this->body.pop_back();
+            if (!snakeGrew) {
+                this->body.pop_back();
+            }
             this->body.push_front({ this->body[0].x + this->Direction.x, this->body[0].y + this->Direction.y });
+            snakeGrew = false;
         }
     }
 
@@ -125,6 +128,7 @@ class Game {
 private:
     Snake* snake;
     Food* food;
+    bool snakeGrew = false;
 public:
     Game() {
         snake = new Snake();
@@ -137,13 +141,14 @@ public:
     }
 
     void updateSnake() {
-        snake->Update();
+        snake->Update(this->snakeGrew);
         snake->updateDirection();
     }
 
     void checkCollosionWithFood() {
         if (snake->didEatFood(food)) {
             food->changeLoc(snake->snakeBody());
+            this->snakeGrew = true;
         }
     }
 
