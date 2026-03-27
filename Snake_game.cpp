@@ -48,10 +48,6 @@ public:
         this->pos = loc;
     }
 
-    void resetFood() {
-        this->pos = getRandomPosition();
-    }
-
     Vector2 getFoodLoc() const {
         return this->pos;
     }
@@ -124,8 +120,7 @@ public:
     }
 
     bool didHitWall() {
-        if (this->body[0].x == -1 || this->body[0].x == cellCount || this->body[0].y == cellCount || this->body[0].y == -1) {
-            cout << "Snake Hit Wall.\n";
+        if (this->body[0].x < 0 || this->body[0].x >= cellCount || this->body[0].y >= cellCount || this->body[0].y < 0) {
             return true;
         }
         return false;
@@ -155,10 +150,14 @@ private:
     Snake* snake;
     Food* food;
     bool snakeGrew = false;
+    int score = 0;
+    Music bgMusic;
 public:
     Game() {
         snake = new Snake();
         food = new Food();
+        bgMusic = LoadMusicStream("sounds/background.mp3");
+        PlayMusicStream(bgMusic);
      }
 
     void draw() {
@@ -166,15 +165,20 @@ public:
         snake->draw();
     }
 
+    void updateMusic() const {
+        UpdateMusicStream(bgMusic);
+    }
+
     void updateSnake() {
         snake->Update(this->snakeGrew);
         snake->updateDirection();
     }
 
-    void checkCollosionWithFood() {
+    void checkCollisionWithFood() {
         if (snake->didEatFood(food)) {
             food->changeLoc(snake->snakeBody());
             this->snakeGrew = true;
+            this->score++;
         }
     }
 
@@ -192,7 +196,13 @@ public:
 
     void GameOver() {
         snake->resetSnake();
-        food->resetFood();
+        food->changeLoc(snake->snakeBody());
+        snakeGrew = false;
+        this->score = 0;
+    }
+
+    int getScore() const {
+        return this->score;
     }
 
     ~Game() {
@@ -200,8 +210,11 @@ public:
         delete food;
         snake = nullptr;
         food = nullptr;
+        StopMusicStream(bgMusic);
+        UnloadMusicStream(bgMusic);
     }
 };
+
 
 int main()
 {
@@ -209,6 +222,7 @@ int main()
     const int height = cellSize * cellCount;
 
     InitWindow(width, height, "Snake Game");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     Game game;
@@ -217,17 +231,21 @@ int main()
 
         game.checkCollisionWithSnakeItself();
         game.checkCollisionWithWall();
-        game.checkCollosionWithFood();
+        game.checkCollisionWithFood();
     
+        game.updateMusic();
         game.updateSnake();
   
         BeginDrawing();
         ClearBackground(DARKGREEN);
+        DrawText("Score : ", 10, 10, 50, BLACK);
+        DrawText(TextFormat("%i", game.getScore()), 200, 10, 50, BLACK);
         game.draw();
         EndDrawing();
 
     }
 
+    CloseAudioDevice();
     CloseWindow();
         
     return 0;
