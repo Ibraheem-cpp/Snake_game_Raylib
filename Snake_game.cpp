@@ -131,6 +131,15 @@ public:
         return false;
     }
 
+    bool didHitSnakeItself() {
+        for (int i = 1; i < this->body.size(); i++) {
+            if ((this->body[0].x == this->body[i].x) && (this->body[0].y == this->body[i].y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void resetSnake() {
         this->body = { Vector2{6,9}, Vector2{5,9}, Vector2{4,9} };
         this->Direction = { 1,0 };
@@ -175,6 +184,12 @@ public:
         }
     }
 
+    void checkCollisionWithSnakeItself() {
+        if (snake->didHitSnakeItself()) {
+            GameOver();
+        }
+    }
+
     void GameOver() {
         snake->resetSnake();
         food->resetFood();
@@ -200,6 +215,7 @@ int main()
 
     while (!WindowShouldClose()) {
 
+        game.checkCollisionWithSnakeItself();
         game.checkCollisionWithWall();
         game.checkCollosionWithFood();
     
