@@ -48,6 +48,10 @@ public:
         this->pos = loc;
     }
 
+    void resetFood() {
+        this->pos = getRandomPosition();
+    }
+
     Vector2 getFoodLoc() const {
         return this->pos;
     }
@@ -119,6 +123,19 @@ public:
         return false;
     }
 
+    bool didHitWall() {
+        if (this->body[0].x == -1 || this->body[0].x == cellCount || this->body[0].y == cellCount || this->body[0].y == -1) {
+            cout << "Snake Hit Wall.\n";
+            return true;
+        }
+        return false;
+    }
+
+    void resetSnake() {
+        this->body = { Vector2{6,9}, Vector2{5,9}, Vector2{4,9} };
+        this->Direction = { 1,0 };
+    }
+
     const deque<Vector2>& snakeBody() const {
         return this->body;
     }
@@ -133,7 +150,7 @@ public:
     Game() {
         snake = new Snake();
         food = new Food();
-    }
+     }
 
     void draw() {
         food->draw();
@@ -150,6 +167,17 @@ public:
             food->changeLoc(snake->snakeBody());
             this->snakeGrew = true;
         }
+    }
+
+    void checkCollisionWithWall() {
+        if (snake->didHitWall()) {
+            GameOver();
+        }
+    }
+
+    void GameOver() {
+        snake->resetSnake();
+        food->resetFood();
     }
 
     ~Game() {
@@ -172,6 +200,7 @@ int main()
 
     while (!WindowShouldClose()) {
 
+        game.checkCollisionWithWall();
         game.checkCollosionWithFood();
     
         game.updateSnake();
@@ -180,6 +209,7 @@ int main()
         ClearBackground(DARKGREEN);
         game.draw();
         EndDrawing();
+
     }
 
     CloseWindow();
