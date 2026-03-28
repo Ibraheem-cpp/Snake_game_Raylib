@@ -152,12 +152,18 @@ private:
     bool snakeGrew = false;
     int score = 0;
     Music bgMusic;
+    Sound eat;
+    Sound die;
+    bool isRunning = true;
 public:
     Game() {
         snake = new Snake();
         food = new Food();
         bgMusic = LoadMusicStream("sounds/background.mp3");
         PlayMusicStream(bgMusic);
+        SetMusicVolume(bgMusic, 0.4f);
+        eat = LoadSound("sounds/eat.mp3");
+        die = LoadSound("sounds/die.mp3");
      }
 
     void draw() {
@@ -176,6 +182,7 @@ public:
 
     void checkCollisionWithFood() {
         if (snake->didEatFood(food)) {
+            PlaySound(eat);
             food->changeLoc(snake->snakeBody());
             this->snakeGrew = true;
             this->score++;
@@ -184,12 +191,14 @@ public:
 
     void checkCollisionWithWall() {
         if (snake->didHitWall()) {
+            PlaySound(die);
             GameOver();
         }
     }
 
     void checkCollisionWithSnakeItself() {
         if (snake->didHitSnakeItself()) {
+            PlaySound(die);
             GameOver();
         }
     }
@@ -199,10 +208,26 @@ public:
         food->changeLoc(snake->snakeBody());
         snakeGrew = false;
         this->score = 0;
+        this->isRunning = false;
+        
+    }
+
+    void startAgain() {
+        if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_A)) {
+            this->isRunning = true;
+        }
+    }
+
+    void drawStartAgain() {
+        DrawText("Press 'A','S','D','W' to Start Game Again.", (cellCount * cellSize) / 8, (cellCount * cellSize) / 2, 30, BLACK);
     }
 
     int getScore() const {
         return this->score;
+    }
+    
+    bool IsRunning() const {
+        return this->isRunning;
     }
 
     ~Game() {
@@ -212,6 +237,8 @@ public:
         food = nullptr;
         StopMusicStream(bgMusic);
         UnloadMusicStream(bgMusic);
+        UnloadSound(eat);
+        UnloadSound(die);
     }
 };
 
@@ -228,19 +255,27 @@ int main()
     Game game;
 
     while (!WindowShouldClose()) {
-
-        game.checkCollisionWithSnakeItself();
-        game.checkCollisionWithWall();
-        game.checkCollisionWithFood();
-    
         game.updateMusic();
-        game.updateSnake();
+
+        if (game.IsRunning()) {
+            game.checkCollisionWithSnakeItself();
+            game.checkCollisionWithWall();
+            game.checkCollisionWithFood();
+
+            game.updateSnake();
+        }
+        else {
+            game.startAgain();
+        }
   
         BeginDrawing();
         ClearBackground(DARKGREEN);
         DrawText("Score : ", 10, 10, 50, BLACK);
         DrawText(TextFormat("%i", game.getScore()), 200, 10, 50, BLACK);
         game.draw();
+        if (!game.IsRunning()) {
+            game.drawStartAgain();
+        }
         EndDrawing();
 
     }
