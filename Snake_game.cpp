@@ -7,6 +7,8 @@ using namespace std;
 
 const int cellSize = 30;
 const int cellCount = 25;
+const int offset = 150;
+const int margin = offset / 2;
 
 class Food {
 private:
@@ -21,8 +23,8 @@ public:
     }
 
     void draw() const {
-        int x = pos.x * cellSize;
-        int y = pos.y * cellSize;
+        int x = pos.x * cellSize + margin;
+        int y = pos.y * cellSize + margin;
         DrawTexture(this->food_texture, x, y, WHITE);
     }
 
@@ -79,8 +81,8 @@ public:
 
     void draw() {
         for (int i = 0; i < this->body.size(); i++) {
-            float pos_x = this->body[i].x * cellSize;
-            float pos_y = this->body[i].y * cellSize;
+            float pos_x = this->body[i].x * cellSize + margin;
+            float pos_y = this->body[i].y * cellSize + margin;
             Rectangle segment = Rectangle{ pos_x,pos_y,cellSize,cellSize };
             DrawRectangleRounded(segment, 0.7, 8, MAROON);
         }
@@ -209,7 +211,6 @@ public:
         snakeGrew = false;
         this->score = 0;
         this->isRunning = false;
-        
     }
 
     void startAgain() {
@@ -219,7 +220,7 @@ public:
     }
 
     void drawStartAgain() {
-        DrawText("Press 'A','S','D','W' to Start Game Again.", (cellCount * cellSize) / 8, (cellCount * cellSize) / 2, 30, BLACK);
+        DrawText("Press 'W','A','S','D' to Start Game Again.", (cellCount * cellSize) / 8, (cellCount * cellSize) / 2 + margin, 30, BLACK);
     }
 
     int getScore() const {
@@ -248,7 +249,7 @@ int main()
     const int width = cellSize * cellCount;
     const int height = cellSize * cellCount;
 
-    InitWindow(width, height, "Snake Game");
+    InitWindow(offset + width, offset + height, "Snake Game");
     InitAudioDevice();
     SetTargetFPS(60);
 
@@ -269,9 +270,11 @@ int main()
         }
   
         BeginDrawing();
-        ClearBackground(DARKGREEN);
-        DrawText("Score : ", 10, 10, 50, BLACK);
-        DrawText(TextFormat("%i", game.getScore()), 200, 10, 50, BLACK);
+        ClearBackground(LIME);
+        DrawText("Snake Game", (cellCount*cellSize)/2 - margin, 15, 50, BLACK);
+        DrawText("Score : ", margin, (cellCount*cellSize) + margin + 10, 40, BLACK);
+        DrawText(TextFormat("%i", game.getScore()), margin + 160, (cellCount * cellSize) + margin + 10, 40, BLACK);
+        DrawRectangleLinesEx(Rectangle{ margin-5 , margin-5 , cellCount * cellSize +10, cellCount * cellSize + 10}, 5, BLACK);
         game.draw();
         if (!game.IsRunning()) {
             game.drawStartAgain();
