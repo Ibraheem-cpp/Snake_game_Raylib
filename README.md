@@ -51,6 +51,11 @@ g++ Snake_game.cpp -o snake -lraylib -lm -lpthread
 3. Game Class - manages game state, score, audio and all game logic.
 
 ---
+**Screenshots**
+
+![Screenshot 1](screenshots/screenshot1.png)
+
+![Screenshot 2](screenshots/screenshot2.png)
 
 
 
