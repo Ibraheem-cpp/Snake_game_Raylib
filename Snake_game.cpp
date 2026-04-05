@@ -84,7 +84,12 @@ public:
             float pos_x = this->body[i].x * cellSize + margin;
             float pos_y = this->body[i].y * cellSize + margin;
             Rectangle segment = Rectangle{ pos_x,pos_y,cellSize,cellSize };
-            DrawRectangleRounded(segment, 0.7, 8, MAROON);
+            if (i == 0) {
+                DrawRectangleRounded(segment, 0.7, 8, BLACK);
+            }
+            else {
+                DrawRectangleRounded(segment, 0.7, 8, MAROON);
+            }
         }
     }
 
