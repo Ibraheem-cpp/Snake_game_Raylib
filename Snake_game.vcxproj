@@ -125,6 +125,9 @@
   <ItemGroup>
     <ClCompile Include="Snake_game.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="button.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
