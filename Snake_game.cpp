@@ -276,7 +276,7 @@ int main()
   
         BeginDrawing();
         ClearBackground(LIME);
-        DrawText("Snake Game", (cellCount*cellSize)/2 - margin, 15, 50, BLACK);
+       DrawText("Snake Game", (cellCount*cellSize)/2 - margin, 15, 50, BLACK);
         DrawText("Score : ", margin, (cellCount*cellSize) + margin + 10, 40, BLACK);
         DrawText(TextFormat("%i", game.getScore()), margin + 160, (cellCount * cellSize) + margin + 10, 40, BLACK);
         DrawRectangleLinesEx(Rectangle{ margin-5 , margin-5 , cellCount * cellSize +10, cellCount * cellSize + 10}, 5, BLACK);
