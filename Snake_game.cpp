@@ -2,6 +2,7 @@
 #include <deque>
 #include "raylib.h"
 #include "raymath.h"
+#include "button.h"
 
 using namespace std;
 
@@ -9,6 +10,8 @@ const int cellSize = 30;
 const int cellCount = 25;
 const int offset = 150;
 const int margin = offset / 2;
+const int Width = cellSize * cellCount;
+const int Height = cellSize * cellCount;
 
 class Food {
 private:
@@ -85,7 +88,7 @@ public:
             float pos_y = this->body[i].y * cellSize + margin;
             Rectangle segment = Rectangle{ pos_x,pos_y,cellSize,cellSize };
             if (i == 0) {
-                DrawRectangleRounded(segment, 0.7, 8, MAROON);
+                DrawRectangleRounded(segment, 0.7, 8, BLACK);
             }
             else {
                 DrawRectangleRounded(segment, 0.7, 8, MAROON);
@@ -162,6 +165,9 @@ private:
     Sound eat;
     Sound die;
     bool isRunning = true;
+    Texture2D menuBG;
+    Button playButton{ (Width + offset) / 2, (Height + offset) / 2, "PLAY", -50, 70 };
+    Button exitButton{ (Width + offset) / 2, (Height + offset) / 2, "QUIT", 100, 70 };
 public:
     Game() {
         snake = new Snake();
@@ -171,6 +177,7 @@ public:
         SetMusicVolume(bgMusic, 0.4f);
         eat = LoadSound("sounds/eat.mp3");
         die = LoadSound("sounds/die.mp3");
+        menuBG = LoadTexture("assets/menuBG.png");
      }
 
     void draw() {
@@ -225,7 +232,32 @@ public:
     }
 
     void drawStartAgain() {
-        DrawText("Press 'W','A','S','D' to Start Game Again.", (cellCount * cellSize) / 8, (cellCount * cellSize) / 2 + margin, 30, BLACK);
+        DrawText("Press 'W','A','S','D' to Start Game.", (cellCount * cellSize) / 8, (cellCount * cellSize) / 2 + margin, 30, BLACK);
+    }
+
+    void drawMenu() const {
+        DrawTexture(menuBG, 0, 0, WHITE);
+        playButton.Draw();
+        playButton.isHovering();
+        exitButton.Draw();
+        exitButton.isHovering();
+    }
+
+    bool isPlayButtonClicked() {
+        if (playButton.isClicked()) { 
+            snake->resetSnake();
+            food->changeLoc(snake->snakeBody());
+            snakeGrew = false;
+            this->score = 0;
+            this->isRunning = true;
+            return true; 
+        }
+        return false;
+    }
+
+    bool isExitButtonClicked() {
+        if (exitButton.isClicked()) { return true; }
+        return false;
     }
 
     int getScore() const {
@@ -245,44 +277,67 @@ public:
         UnloadMusicStream(bgMusic);
         UnloadSound(eat);
         UnloadSound(die);
+        UnloadTexture(menuBG);
     }
 };
 
 
 int main()
 {
-    const int width = cellSize * cellCount;
-    const int height = cellSize * cellCount;
+   
+    enum GameState{MENU, PLAYING, EXIT};
 
-    InitWindow(offset + width, offset + height, "Snake Game");
+    InitWindow(offset + Width, offset + Height, "Snake Game");
     InitAudioDevice();
     SetTargetFPS(60);
+    GameState state = MENU;
+    SetExitKey(KEY_NULL);
 
     Game game;
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && state != EXIT) {
         game.updateMusic();
 
-        if (game.IsRunning()) {
-            game.checkCollisionWithSnakeItself();
-            game.checkCollisionWithWall();
-            game.checkCollisionWithFood();
-
-            game.updateSnake();
+        if (state == MENU) {
+            if (game.isPlayButtonClicked()) {
+                state = PLAYING;
+            }
+            if (game.isExitButtonClicked()) {
+                state = EXIT;
+            }
         }
-        else {
-            game.startAgain();
+
+        if (state == PLAYING) {
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                state = MENU;
+            }
+            if (game.IsRunning()) {
+                game.checkCollisionWithSnakeItself();
+                game.checkCollisionWithWall();
+                game.checkCollisionWithFood();
+
+                game.updateSnake();
+            }
+            else {
+                game.startAgain();
+            }
         }
   
+
         BeginDrawing();
         ClearBackground(LIME);
-       DrawText("Snake Game", (cellCount*cellSize)/2 - margin, 15, 50, BLACK);
-        DrawText("Score : ", margin, (cellCount*cellSize) + margin + 10, 40, BLACK);
-        DrawText(TextFormat("%i", game.getScore()), margin + 160, (cellCount * cellSize) + margin + 10, 40, BLACK);
-        DrawRectangleLinesEx(Rectangle{ margin-5 , margin-5 , cellCount * cellSize +10, cellCount * cellSize + 10}, 5, BLACK);
-        game.draw();
-        if (!game.IsRunning()) {
-            game.drawStartAgain();
+        if (state == MENU) {
+            game.drawMenu();
+        }
+        if (state == PLAYING) {
+            DrawText("Snake Game", (cellCount * cellSize) / 2 - margin, 15, 50, BLACK);
+            DrawText("Score : ", margin, (cellCount * cellSize) + margin + 10, 40, BLACK);
+            DrawText(TextFormat("%i", game.getScore()), margin + 160, (cellCount * cellSize) + margin + 10, 40, BLACK);
+            DrawRectangleLinesEx(Rectangle{ margin - 5 , margin - 5 , cellCount * cellSize + 10, cellCount * cellSize + 10 }, 5, BLACK);
+            game.draw();
+            if (!game.IsRunning()) {
+                game.drawStartAgain();
+            }
         }
         EndDrawing();
 
