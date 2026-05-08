@@ -2,11 +2,12 @@
 
 **Features:**
 1. Classic Snake Gameplay.
-2. Food texture with random spawning.
-3. Background music with sound effects(eating, dying).
-4. Wall and self-collision detection.
-5. Score Tracking.
-6. Game over and restart system.
+2. Main Menu.
+3. Food texture with random spawning.
+4. Background music with sound effects(eating, dying).
+5. Wall and self-collision detection.
+6. Score Tracking.
+7. Game over and restart system.
 
 
 ---
@@ -52,6 +53,8 @@ g++ Snake_game.cpp -o snake -lraylib -lm -lpthread
 
 ---
 **Screenshots**
+
+![Screenshot 3](screenshots/screenshot3.png)
 
 ![Screenshot 1](screenshots/screenshot1.png)
 
